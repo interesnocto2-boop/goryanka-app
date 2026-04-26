@@ -25,15 +25,42 @@ const COLORS = {
 const PRICE_PER_BOTTLE = 350;
 
 const PAYMENT_OPTIONS = [
-  { id: 'cash', label: 'Наличные' },
-  { id: 'card_courier', label: 'Картой курьеру' },
-  { id: 'online', label: 'Онлайн' },
+  { id: 'cash', label: '💵 Наличные' },
+  { id: 'card_courier', label: '💳 Картой курьеру' },
+  { id: 'online', label: '📱 Онлайн (СБП / карта)' },
 ];
+
+const TIME_SLOTS = [
+  '09:00', '10:00', '11:00', '12:00', '13:00',
+  '14:00', '15:00', '16:00', '17:00', '18:00',
+];
+
+function getDates() {
+  const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+  const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    dates.push({
+      key: i,
+      day: days[d.getDay()],
+      date: d.getDate(),
+      month: months[d.getMonth()],
+      label: i === 0 ? 'Сегодня' : i === 1 ? 'Завтра' : null,
+      full: d,
+    });
+  }
+  return dates;
+}
 
 export default function WaterOrderScreen({ navigation }) {
   const [quantity, setQuantity] = useState(1);
   const [payment, setPayment] = useState('cash');
   const [comment, setComment] = useState('');
+  const [selectedDate, setSelectedDate] = useState(0);
+  const [selectedTime, setSelectedTime] = useState('13:00');
+  const dates = getDates();
 
   const totalPrice = quantity * PRICE_PER_BOTTLE;
 
@@ -46,15 +73,12 @@ export default function WaterOrderScreen({ navigation }) {
   }
 
   function handleOrder() {
+    const d = dates[selectedDate];
+    const dateStr = d.label || `${d.date} ${d.month}`;
     Alert.alert(
-      'Заказ оформлен!',
-      'Мы свяжемся с вами.',
-      [
-        {
-          text: 'OK',
-          onPress: () => navigation && navigation.goBack(),
-        },
-      ],
+      'Заказ оформлен! 💧',
+      `Доставим ${dateStr} в ${selectedTime}.\nМы свяжемся с вами для подтверждения.`,
+      [{ text: 'Отлично!', onPress: () => navigation && navigation.goBack() }],
       { cancelable: false }
     );
   }
@@ -124,15 +148,42 @@ export default function WaterOrderScreen({ navigation }) {
 
         {/* Time Card */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Время доставки</Text>
-          <View style={styles.infoRow}>
-            <View>
-              <Text style={styles.infoText}>📅  Сегодня</Text>
-              <Text style={[styles.infoText, { marginTop: 4 }]}>🕐  14:00 – 16:00</Text>
-            </View>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Text style={styles.changeBtn}>Изменить</Text>
-            </TouchableOpacity>
+          <Text style={styles.cardLabel}>Дата доставки</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -4 }}>
+            {dates.map((d) => (
+              <TouchableOpacity
+                key={d.key}
+                style={[styles.dateChip, selectedDate === d.key && styles.dateChipActive]}
+                onPress={() => setSelectedDate(d.key)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.dateChipDay, selectedDate === d.key && styles.dateChipTextActive]}>
+                  {d.label || d.day}
+                </Text>
+                <Text style={[styles.dateChipNum, selectedDate === d.key && styles.dateChipTextActive]}>
+                  {d.date}
+                </Text>
+                <Text style={[styles.dateChipMonth, selectedDate === d.key && styles.dateChipTextActive]}>
+                  {d.month}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <Text style={[styles.cardLabel, { marginTop: 16 }]}>Время</Text>
+          <View style={styles.timeGrid}>
+            {TIME_SLOTS.map((t) => (
+              <TouchableOpacity
+                key={t}
+                style={[styles.timeChip, selectedTime === t && styles.timeChipActive]}
+                onPress={() => setSelectedTime(t)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.timeChipText, selectedTime === t && styles.timeChipTextActive]}>
+                  {t}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -318,6 +369,48 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.primary,
   },
+
+  // Date chips
+  dateChip: {
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    marginHorizontal: 4,
+    minWidth: 60,
+    backgroundColor: COLORS.surface,
+  },
+  dateChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  dateChipDay: { fontSize: 11, color: COLORS.textMuted, fontWeight: '600' },
+  dateChipNum: { fontSize: 20, fontWeight: '800', color: COLORS.primary, marginVertical: 2 },
+  dateChipMonth: { fontSize: 11, color: COLORS.textMuted },
+  dateChipTextActive: { color: '#fff' },
+
+  // Time grid
+  timeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  timeChip: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface,
+  },
+  timeChipActive: {
+    backgroundColor: COLORS.primaryLight,
+    borderColor: COLORS.primaryLight,
+  },
+  timeChipText: { fontSize: 15, fontWeight: '600', color: COLORS.primary },
+  timeChipTextActive: { color: '#fff' },
 
   // Info rows
   infoRow: {
