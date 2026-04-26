@@ -7,21 +7,23 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert,
+  ImageBackground,
 } from 'react-native';
 
 const COLORS = {
   primary: '#1A3A6B',
   primaryLight: '#2E6DB4',
-  accent: '#5BB8F5',
-  red: '#C0392B',
+  primaryPale: '#E8F1FB',
+  accent: '#C0392B',
+  accentLight: '#F8A0A0',
   background: '#F0F7FF',
   surface: '#FFFFFF',
   text: '#1A2E45',
-  textSecondary: '#5A7A99',
+  textMuted: '#6B8AAD',
   border: '#DDE8F5',
 };
 
-// ─── Service card data ───────────────────────────────────────────────────────
+// ─── Service card data ────────────────────────────────────────────────────────
 const SERVICE_CARDS = [
   { id: 1, emoji: '🔧', title: 'Установка кулера', subtitle: 'Бесплатно при заказе' },
   { id: 2, emoji: '🔄', title: 'Замена кулера', subtitle: 'Новая модель' },
@@ -29,35 +31,45 @@ const SERVICE_CARDS = [
   { id: 4, emoji: '📞', title: 'Связаться', subtitle: '+7 (800) 000-00-00' },
 ];
 
-// ─── Hero card (gradient-like via overlapping views) ─────────────────────────
-function HeroCard({ quantity, onOrder }) {
+// ─── Hero section ─────────────────────────────────────────────────────────────
+function HeroSection({ onOrder }) {
   return (
-    <View style={styles.heroCard}>
-      {/* background layer — светлее снизу */}
-      <View style={styles.heroCardInner}>
-        <View style={styles.heroLeft}>
-          <Text style={styles.heroEmoji}>💧</Text>
-          <Text style={styles.heroTitle}>Заказать воду</Text>
-          <Text style={styles.heroSubtitle}>Артезианская 19л</Text>
-          <TouchableOpacity style={styles.heroButton} onPress={onOrder} activeOpacity={0.85}>
-            <Text style={styles.heroButtonText}>Заказать сейчас</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.heroRight}>
-          <Text style={styles.heroBottleEmoji}>🫧</Text>
-          <Text style={styles.heroPriceLabel}>от</Text>
-          <Text style={styles.heroPrice}>350 ₽</Text>
-        </View>
+    <ImageBackground
+      source={require('../assets/hero.jpg')}
+      style={styles.heroSection}
+      imageStyle={{ resizeMode: 'cover' }}
+    >
+      {/* Тёмный overlay для читаемости текста */}
+      <View style={styles.heroOverlay} />
+      <View style={styles.heroContent}>
+        <Text style={styles.heroTitle}>{'Чистая вода\nс горных вершин'}</Text>
+        <Text style={styles.heroSubtitle}>Артезианская · 19л · Концильская</Text>
+        <Text style={styles.heroPrice}>от 350 ₽</Text>
       </View>
+    </ImageBackground>
+  );
+}
+
+// ─── Order button ─────────────────────────────────────────────────────────────
+function OrderButton({ onPress }) {
+  return (
+    <View style={styles.orderButtonWrap}>
+      <TouchableOpacity style={styles.orderButton} onPress={onPress} activeOpacity={0.85}>
+        <Text style={styles.orderButtonText}>💧 Заказать воду сейчас</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
-// ─── Quantity selector ───────────────────────────────────────────────────────
+// ─── Quantity selector ────────────────────────────────────────────────────────
 function QuantitySelector({ quantity, onDecrease, onIncrease, onAddToOrder }) {
   return (
     <View style={styles.qtySection}>
-      <Text style={styles.qtySectionTitle}>Быстрый выбор</Text>
+      {/* Заголовок с красной полоской */}
+      <View style={styles.sectionTitleRow}>
+        <View style={styles.redStripe} />
+        <Text style={styles.sectionTitleText}>Быстрый заказ</Text>
+      </View>
       <View style={styles.qtyRow}>
         <View style={styles.qtyControl}>
           <TouchableOpacity
@@ -66,7 +78,7 @@ function QuantitySelector({ quantity, onDecrease, onIncrease, onAddToOrder }) {
             activeOpacity={0.7}
             disabled={quantity <= 1}
           >
-            <Text style={[styles.qtyBtnText, quantity <= 1 && styles.qtyBtnTextDisabled]}>−</Text>
+            <Text style={styles.qtyBtnText}>−</Text>
           </TouchableOpacity>
           <View style={styles.qtyValueBox}>
             <Text style={styles.qtyValue}>{quantity}</Text>
@@ -78,29 +90,31 @@ function QuantitySelector({ quantity, onDecrease, onIncrease, onAddToOrder }) {
             activeOpacity={0.7}
             disabled={quantity >= 99}
           >
-            <Text style={[styles.qtyBtnText, quantity >= 99 && styles.qtyBtnTextDisabled]}>+</Text>
+            <Text style={styles.qtyBtnText}>+</Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.addToOrderBtn} onPress={onAddToOrder} activeOpacity={0.85}>
-          <Text style={styles.addToOrderText}>Добавить в заказ</Text>
+          <Text style={styles.addToOrderText}>Добавить в корзину</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-// ─── Service card ────────────────────────────────────────────────────────────
+// ─── Service card ─────────────────────────────────────────────────────────────
 function ServiceCard({ emoji, title, subtitle, onPress }) {
   return (
     <TouchableOpacity style={styles.serviceCard} onPress={onPress} activeOpacity={0.8}>
-      <Text style={styles.serviceEmoji}>{emoji}</Text>
+      <View style={styles.serviceIconBox}>
+        <Text style={styles.serviceEmoji}>{emoji}</Text>
+      </View>
       <Text style={styles.serviceTitle}>{title}</Text>
       <Text style={styles.serviceSubtitle}>{subtitle}</Text>
     </TouchableOpacity>
   );
 }
 
-// ─── HomeScreen ──────────────────────────────────────────────────────────────
+// ─── HomeScreen ───────────────────────────────────────────────────────────────
 export default function HomeScreen({ navigation }) {
   const [quantity, setQuantity] = useState(1);
   const address = 'ул. Ленина, 12, кв. 34';
@@ -113,7 +127,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleAddToOrder = () => {
-    Alert.alert('Добавлено', `${quantity} бутылей добавлено в заказ`);
+    Alert.alert('Добавлено', `${quantity} бутылей добавлено в корзину`);
   };
 
   const handleServicePress = (service) => {
@@ -124,8 +138,8 @@ export default function HomeScreen({ navigation }) {
     Alert.alert('Уведомления', 'Новых уведомлений нет');
   };
 
-  const handleAddressPress = () => {
-    Alert.alert('Адрес доставки', 'Изменение адреса — скоро');
+  const handleCart = () => {
+    navigation && navigation.navigate && navigation.navigate('Cart');
   };
 
   return (
@@ -133,34 +147,32 @@ export default function HomeScreen({ navigation }) {
       {/* ── Header ── */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerGreeting}>Добрый день! 👋</Text>
-          <Text style={styles.headerName}>Горянка</Text>
+          <Text style={styles.headerSub}>концильская</Text>
+          <Text style={styles.headerTitle}>ГОРЯНКА</Text>
         </View>
-        <TouchableOpacity style={styles.notifBtn} onPress={handleNotification} activeOpacity={0.7}>
-          <Text style={styles.notifIcon}>🔔</Text>
-          <View style={styles.notifBadge} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.cartBtn} onPress={handleCart} activeOpacity={0.8}>
+            <Text style={styles.cartIcon}>🛒</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.notifBtn} onPress={handleNotification} activeOpacity={0.7}>
+            <Text style={styles.notifIcon}>🔔</Text>
+            <View style={styles.notifBadge} />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* ── Hero section (часть шапки) ── */}
+      <HeroSection onOrder={handleOrder} />
 
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Address bar ── */}
-        <TouchableOpacity style={styles.addressBar} onPress={handleAddressPress} activeOpacity={0.8}>
-          <Text style={styles.addressIcon}>📍</Text>
-          <View style={styles.addressTextBlock}>
-            <Text style={styles.addressLabel}>Адрес доставки</Text>
-            <Text style={styles.addressValue} numberOfLines={1}>{address}</Text>
-          </View>
-          <Text style={styles.addressChevron}>›</Text>
-        </TouchableOpacity>
+        {/* ── Кнопка заказать ── */}
+        <OrderButton onPress={handleOrder} />
 
-        {/* ── Hero card ── */}
-        <HeroCard quantity={quantity} onOrder={handleOrder} />
-
-        {/* ── Quantity selector ── */}
+        {/* ── Быстрый выбор ── */}
         <QuantitySelector
           quantity={quantity}
           onDecrease={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -169,7 +181,10 @@ export default function HomeScreen({ navigation }) {
         />
 
         {/* ── Services grid ── */}
-        <Text style={styles.sectionTitle}>Услуги</Text>
+        <View style={styles.sectionTitleRow}>
+          <View style={styles.redStripe} />
+          <Text style={styles.sectionTitleText}>Услуги</Text>
+        </View>
         <View style={styles.servicesGrid}>
           {SERVICE_CARDS.map((s) => (
             <ServiceCard
@@ -182,13 +197,13 @@ export default function HomeScreen({ navigation }) {
           ))}
         </View>
 
-        <View style={{ height: 16 }} />
+        <View style={{ height: 24 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
@@ -202,19 +217,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
   },
-  headerGreeting: {
-    color: '#A8C8EE',
-    fontSize: 13,
+  headerSub: {
+    color: COLORS.accentLight,
+    fontSize: 11,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
     fontWeight: '500',
   },
-  headerName: {
+  headerTitle: {
     color: COLORS.surface,
     fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  cartBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: COLORS.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartIcon: {
+    fontSize: 18,
   },
   notifBtn: {
     width: 40,
@@ -234,148 +267,112 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: COLORS.red,
+    backgroundColor: COLORS.accent,
     borderWidth: 1.5,
     borderColor: COLORS.primary,
+  },
+
+  // Hero section
+  heroSection: {
+    height: 240,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(10, 28, 60, 0.55)',
+  },
+  heroContent: {
+    zIndex: 1,
+  },
+  heroTitle: {
+    color: COLORS.surface,
+    fontSize: 26,
+    fontWeight: '800',
+    lineHeight: 32,
+    marginBottom: 6,
+  },
+  heroSubtitle: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 13,
+    fontWeight: '400',
+    marginBottom: 10,
+  },
+  heroPrice: {
+    color: COLORS.surface,
+    fontSize: 18,
+    fontWeight: '700',
   },
 
   // Scroll
   scroll: {
     flex: 1,
     backgroundColor: COLORS.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
   },
   scrollContent: {
     paddingHorizontal: 16,
+    paddingTop: 0,
+  },
+
+  // Order button
+  orderButtonWrap: {
     paddingTop: 20,
+    paddingBottom: 4,
   },
-
-  // Address bar
-  addressBar: {
-    flexDirection: 'row',
+  orderButton: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 16,
+    paddingVertical: 16,
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 16,
-    shadowColor: '#1A3A6B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  addressIcon: {
-    fontSize: 20,
-    marginRight: 10,
-  },
-  addressTextBlock: {
-    flex: 1,
-  },
-  addressLabel: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  addressValue: {
-    color: COLORS.text,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  addressChevron: {
-    color: COLORS.textSecondary,
-    fontSize: 22,
-    marginLeft: 8,
-  },
-
-  // Hero card
-  heroCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 16,
-    backgroundColor: COLORS.primary,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    justifyContent: 'center',
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
     elevation: 8,
   },
-  heroCardInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    // Имитация градиента: правая половина светлее через overlapping
-    backgroundColor: COLORS.primary,
-  },
-  heroLeft: {
-    flex: 1,
-  },
-  heroEmoji: {
-    fontSize: 28,
-    marginBottom: 8,
-  },
-  heroTitle: {
+  orderButtonText: {
     color: COLORS.surface,
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  heroSubtitle: {
-    color: '#A8C8EE',
-    fontSize: 13,
-    marginBottom: 16,
-    fontWeight: '500',
-  },
-  heroButton: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    alignSelf: 'flex-start',
-  },
-  heroButtonText: {
-    color: COLORS.primary,
+    fontSize: 17,
     fontWeight: '700',
-    fontSize: 14,
-  },
-  heroRight: {
-    alignItems: 'center',
-    marginLeft: 12,
-  },
-  heroBottleEmoji: {
-    fontSize: 48,
-    marginBottom: 4,
-  },
-  heroPriceLabel: {
-    color: '#A8C8EE',
-    fontSize: 11,
-  },
-  heroPrice: {
-    color: COLORS.surface,
-    fontSize: 22,
-    fontWeight: '800',
+    letterSpacing: 0.3,
   },
 
-  // Quantity selector
+  // Section title with stripe
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 14,
+    gap: 10,
+  },
+  redStripe: {
+    width: 32,
+    height: 4,
+    backgroundColor: COLORS.accent,
+    borderRadius: 2,
+  },
+  sectionTitleText: {
+    color: COLORS.text,
+    fontSize: 17,
+    fontWeight: '700',
+  },
+
+  // Quantity selector card
   qtySection: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-    shadowColor: '#1A3A6B',
+    padding: 18,
+    marginTop: 16,
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  qtySectionTitle: {
-    color: COLORS.text,
-    fontSize: 15,
-    fontWeight: '700',
-    marginBottom: 14,
+    shadowRadius: 8,
+    elevation: 3,
   },
   qtyRow: {
     flexDirection: 'row',
@@ -391,23 +388,20 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   qtyBtn: {
-    width: 40,
-    height: 44,
+    width: 44,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.primary,
   },
   qtyBtnDisabled: {
-    opacity: 0.4,
+    opacity: 0.35,
   },
   qtyBtnText: {
     fontSize: 22,
     fontWeight: '600',
-    color: COLORS.primary,
+    color: COLORS.surface,
     lineHeight: 26,
-  },
-  qtyBtnTextDisabled: {
-    color: COLORS.textSecondary,
   },
   qtyValueBox: {
     paddingHorizontal: 14,
@@ -425,14 +419,14 @@ const styles = StyleSheet.create({
   },
   qtyUnit: {
     fontSize: 10,
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
     fontWeight: '500',
   },
   addToOrderBtn: {
     flex: 1,
     backgroundColor: COLORS.primaryLight,
-    borderRadius: 12,
-    height: 44,
+    borderRadius: 14,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -442,13 +436,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  // Services
-  sectionTitle: {
-    color: COLORS.text,
-    fontSize: 17,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
+  // Services grid
   servicesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -457,17 +445,27 @@ const styles = StyleSheet.create({
   serviceCard: {
     width: '47.5%',
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
-    shadowColor: '#1A3A6B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 6,
-    elevation: 2,
+    borderTopWidth: 3,
+    borderTopColor: COLORS.primaryLight,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  serviceIconBox: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: COLORS.primaryPale,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
   },
   serviceEmoji: {
-    fontSize: 28,
-    marginBottom: 8,
+    fontSize: 24,
   },
   serviceTitle: {
     color: COLORS.text,
@@ -476,7 +474,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   serviceSubtitle: {
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
     fontSize: 11,
     fontWeight: '500',
   },

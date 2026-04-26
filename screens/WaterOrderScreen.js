@@ -14,10 +14,12 @@ import {
 const COLORS = {
   primary: '#1A3A6B',
   primaryLight: '#2E6DB4',
-  red: '#C0392B',
+  primaryPale: '#E8F1FB',
+  accent: '#C0392B',
   background: '#F0F7FF',
   surface: '#FFFFFF',
   textMuted: '#6B7A8D',
+  textSubtle: '#6B8AAD',
   border: '#D0DFF0',
   text: '#1A1A2E',
 };
@@ -54,6 +56,16 @@ function getDates() {
   return dates;
 }
 
+// Компонент заголовка карточки с красной полоской
+function CardLabel({ label, style }) {
+  return (
+    <View style={[styles.cardLabelWrap, style]}>
+      <View style={styles.cardLabelAccent} />
+      <Text style={styles.cardLabel}>{label}</Text>
+    </View>
+  );
+}
+
 export default function WaterOrderScreen({ navigation }) {
   const [quantity, setQuantity] = useState(1);
   const [payment, setPayment] = useState('cash');
@@ -85,8 +97,10 @@ export default function WaterOrderScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
+      {/* Header с двухслойным "градиентом" */}
       <View style={styles.header}>
+        {/* Верхний слой-оверлей — имитация градиента */}
+        <View style={styles.headerOverlay} pointerEvents="none" />
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation && navigation.goBack()}
@@ -105,7 +119,7 @@ export default function WaterOrderScreen({ navigation }) {
       >
         {/* Quantity Card */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Количество бутылей</Text>
+          <CardLabel label="Количество бутылей" />
           <View style={styles.stepperRow}>
             <TouchableOpacity
               style={[styles.stepperBtn, quantity <= 1 && styles.stepperBtnDisabled]}
@@ -137,7 +151,7 @@ export default function WaterOrderScreen({ navigation }) {
 
         {/* Address Card */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Адрес доставки</Text>
+          <CardLabel label="Адрес доставки" />
           <View style={styles.infoRow}>
             <Text style={styles.infoText}>📍  Улица, дом</Text>
             <TouchableOpacity activeOpacity={0.7}>
@@ -148,12 +162,15 @@ export default function WaterOrderScreen({ navigation }) {
 
         {/* Time Card */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Дата доставки</Text>
+          <CardLabel label="Дата доставки" />
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -4 }}>
             {dates.map((d) => (
               <TouchableOpacity
                 key={d.key}
-                style={[styles.dateChip, selectedDate === d.key && styles.dateChipActive]}
+                style={[
+                  styles.dateChip,
+                  selectedDate === d.key && styles.dateChipActive,
+                ]}
                 onPress={() => setSelectedDate(d.key)}
                 activeOpacity={0.8}
               >
@@ -170,7 +187,7 @@ export default function WaterOrderScreen({ navigation }) {
             ))}
           </ScrollView>
 
-          <Text style={[styles.cardLabel, { marginTop: 16 }]}>Время</Text>
+          <CardLabel label="Время" style={{ marginTop: 16 }} />
           <View style={styles.timeGrid}>
             {TIME_SLOTS.map((t) => (
               <TouchableOpacity
@@ -189,7 +206,7 @@ export default function WaterOrderScreen({ navigation }) {
 
         {/* Payment Card */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Способ оплаты</Text>
+          <CardLabel label="Способ оплаты" />
           {PAYMENT_OPTIONS.map((option) => (
             <TouchableOpacity
               key={option.id}
@@ -212,7 +229,7 @@ export default function WaterOrderScreen({ navigation }) {
 
         {/* Comment Card */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Комментарий к заказу</Text>
+          <CardLabel label="Комментарий к заказу" />
           <TextInput
             style={styles.commentInput}
             placeholder="Например: домофон не работает, звоните по телефону"
@@ -240,6 +257,7 @@ export default function WaterOrderScreen({ navigation }) {
             Оформить заказ  {totalPrice.toLocaleString('ru-RU')} ₽
           </Text>
         </TouchableOpacity>
+        <Text style={styles.orderButtonSubtitle}>Бесплатная доставка</Text>
       </View>
     </SafeAreaView>
   );
@@ -251,7 +269,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
 
-  // Header
+  // Header — двухслойный "градиент"
   header: {
     backgroundColor: COLORS.primary,
     flexDirection: 'row',
@@ -259,7 +277,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'android' ? 16 : 8,
     paddingBottom: 14,
+    overflow: 'hidden',
   },
+  // Верхний полупрозрачный слой поверх #1A3A6B — имитирует градиент к #2E6DB4
+  headerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#2E6DB4',
+    opacity: 0.3,
+  },
+
   backButton: {
     width: 36,
     height: 36,
@@ -304,13 +330,25 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
+
+  // Заголовок карточки с красной полоской
+  cardLabelWrap: {
+    flexDirection: 'column',
+    marginBottom: 14,
+  },
+  cardLabelAccent: {
+    width: 24,
+    height: 3,
+    backgroundColor: COLORS.accent,
+    marginBottom: 8,
+    borderRadius: 2,
+  },
   cardLabel: {
     fontSize: 12,
     fontWeight: '700',
     color: COLORS.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 14,
   },
 
   // Stepper
@@ -323,13 +361,20 @@ const styles = StyleSheet.create({
   stepperBtn: {
     width: 48,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   stepperBtnDisabled: {
     backgroundColor: '#C5D4E8',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   stepperBtnText: {
     fontSize: 24,
@@ -385,6 +430,11 @@ const styles = StyleSheet.create({
   dateChipActive: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   dateChipDay: { fontSize: 11, color: COLORS.textMuted, fontWeight: '600' },
   dateChipNum: { fontSize: 20, fontWeight: '800', color: COLORS.primary, marginVertical: 2 },
@@ -406,8 +456,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
   },
   timeChipActive: {
-    backgroundColor: COLORS.primaryLight,
-    borderColor: COLORS.primaryLight,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   timeChipText: { fontSize: 15, fontWeight: '600', color: COLORS.primary },
   timeChipTextActive: { color: '#fff' },
@@ -488,20 +543,26 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.border,
   },
   orderButton: {
-    backgroundColor: COLORS.red,
-    borderRadius: 14,
+    backgroundColor: COLORS.accent,
+    borderRadius: 18,
     paddingVertical: 17,
     alignItems: 'center',
-    shadowColor: COLORS.red,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 14,
+    elevation: 10,
   },
   orderButtonText: {
     color: '#FFFFFF',
     fontSize: 17,
     fontWeight: '800',
     letterSpacing: 0.3,
+  },
+  orderButtonSubtitle: {
+    color: COLORS.textSubtle,
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 6,
   },
 });

@@ -26,24 +26,26 @@ import AddressMapScreen from './screens/AddressMapScreen';
 const COLORS = {
   primary: '#1A3A6B',
   primaryLight: '#2E6DB4',
-  accent: '#5BB8F5',
+  accent: '#C0392B',
+  accentLight: '#F8A0A0',
+  accentBlue: '#5BB8F5',
   background: '#F0F7FF',
   surface: '#FFFFFF',
-  red: '#C0392B',
+  textMuted: '#6B8AAD',
   tabInactive: '#9DB5D0',
 };
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// ─── Tab icon component (emoji-based) ───────────────────────────────────────
+// ─── Tab icon component (emoji-based) ────────────────────────────────────────
 function TabIcon({ emoji, focused }) {
   return (
     <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>
   );
 }
 
-// ─── Main bottom tabs ────────────────────────────────────────────────────────
+// ─── Main bottom tabs ─────────────────────────────────────────────────────────
 function MainTabs({ onLogout }) {
   return (
     <Tab.Navigator
@@ -99,7 +101,7 @@ function MainTabs({ onLogout }) {
   );
 }
 
-// ─── Root app ────────────────────────────────────────────────────────────────
+// ─── Root app ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,9 +126,12 @@ export default function App() {
   if (isLoading) {
     return (
       <View style={styles.splash}>
-        <Text style={styles.splashLogo}>💧</Text>
-        <Text style={styles.splashTitle}>Горянка</Text>
-        <ActivityIndicator color={COLORS.accent} style={{ marginTop: 24 }} />
+        <Text style={styles.splashSub}>концильская</Text>
+        <Text style={styles.splashTitle}>ГОРЯНКА</Text>
+        {/* Волна-разделитель */}
+        <View style={styles.splashDivider} />
+        <Text style={styles.splashCaption}>Артезианская вода</Text>
+        <ActivityIndicator color="#5BB8F5" style={{ marginTop: 32 }} size="large" />
       </View>
     );
   }
@@ -165,14 +170,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  splashLogo: {
-    fontSize: 56,
+  splashSub: {
+    color: COLORS.accentLight,
+    fontSize: 13,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    fontWeight: '500',
+    marginBottom: 6,
   },
   splashTitle: {
-    fontSize: 32,
-    fontWeight: '700',
     color: COLORS.surface,
-    marginTop: 12,
+    fontSize: 42,
+    fontWeight: '900',
     letterSpacing: 1,
+  },
+  splashDivider: {
+    height: 3,
+    width: 80,
+    backgroundColor: COLORS.accent,
+    borderRadius: 2,
+    marginVertical: 16,
+  },
+  splashCaption: {
+    color: '#A0BFE0',
+    fontSize: 13,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    fontWeight: '400',
   },
 });
