@@ -12,6 +12,11 @@ import AuthScreen from './screens/AuthScreen';
 import OrdersScreen from './screens/OrdersScreen';
 import ServicesScreen from './screens/ServicesScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import WaterOrderScreen from './screens/WaterOrderScreen';
+import CartScreen from './screens/CartScreen';
+import SubscriptionScreen from './screens/SubscriptionScreen';
+import ChatScreen from './screens/ChatScreen';
+import AddressMapScreen from './screens/AddressMapScreen';
 
 // NOTE: установи AsyncStorage командой:
 //   npx expo install @react-native-async-storage/async-storage
@@ -132,9 +137,16 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isLoggedIn ? (
-            <Stack.Screen name="MainTabs">
-              {() => <MainTabs onLogout={handleLogout} />}
-            </Stack.Screen>
+            <>
+              <Stack.Screen name="MainTabs">
+                {() => <MainTabs onLogout={handleLogout} />}
+              </Stack.Screen>
+              <Stack.Screen name="WaterOrder" component={WaterOrderScreen} />
+              <Stack.Screen name="Cart" component={CartScreen} />
+              <Stack.Screen name="Subscription" component={SubscriptionScreen} />
+              <Stack.Screen name="Chat" component={ChatScreen} />
+              <Stack.Screen name="AddressMap" component={AddressMapScreen} />
+            </>
           ) : (
             <Stack.Screen name="Auth">
               {() => <AuthScreen onLogin={handleLogin} />}
