@@ -5,10 +5,12 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
   ImageBackground,
+  Platform,
+  StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: '#1A3A6B',
@@ -25,10 +27,12 @@ const COLORS = {
 
 // ─── Service card data ────────────────────────────────────────────────────────
 const SERVICE_CARDS = [
-  { id: 1, emoji: '🔧', title: 'Установка кулера', subtitle: 'Бесплатно при заказе' },
-  { id: 2, emoji: '🔄', title: 'Замена кулера', subtitle: 'Новая модель' },
-  { id: 3, emoji: '🛠', title: 'Ремонт кулера', subtitle: 'Выезд мастера' },
-  { id: 4, emoji: '📞', title: 'Связаться', subtitle: '+7 (800) 000-00-00' },
+  { id: 1, icon: '💧', label: 'вода', title: 'Доставка воды', subtitle: '19л · Артезианская', color: '#2E6DB4', bg: '#E8F1FB' },
+  { id: 2, icon: '⚙️', label: 'монтаж', title: 'Установка кулера', subtitle: 'Бесплатно при заказе', color: '#27AE60', bg: '#E8F8F0' },
+  { id: 3, icon: '🔄', label: 'замена', title: 'Замена кулера', subtitle: 'Новая модель', color: '#E67E22', bg: '#FEF5E7' },
+  { id: 4, icon: '🔨', label: 'ремонт', title: 'Ремонт кулера', subtitle: 'Выезд мастера', color: '#C0392B', bg: '#FDECEA' },
+  { id: 5, icon: '📋', label: 'подписка', title: 'Подписка', subtitle: 'Экономия до 15%', color: '#8E44AD', bg: '#F5EEF8' },
+  { id: 6, icon: '📞', label: 'звонок', title: 'Позвонить нам', subtitle: '+7 (800) 000-00-00', color: '#1A3A6B', bg: '#E8F1FB' },
 ];
 
 // ─── Hero section ─────────────────────────────────────────────────────────────
@@ -102,14 +106,25 @@ function QuantitySelector({ quantity, onDecrease, onIncrease, onAddToOrder }) {
 }
 
 // ─── Service card ─────────────────────────────────────────────────────────────
-function ServiceCard({ emoji, title, subtitle, onPress }) {
+function ServiceCard({ icon, label, title, subtitle, color, bg, onPress }) {
   return (
-    <TouchableOpacity style={styles.serviceCard} onPress={onPress} activeOpacity={0.8}>
-      <View style={styles.serviceIconBox}>
-        <Text style={styles.serviceEmoji}>{emoji}</Text>
+    <TouchableOpacity style={styles.serviceCard} onPress={onPress} activeOpacity={0.82}>
+      {/* Цветная полоска слева */}
+      <View style={[styles.serviceAccentBar, { backgroundColor: color }]} />
+      {/* Иконка */}
+      <View style={[styles.serviceIconBox, { backgroundColor: bg }]}>
+        <Text style={styles.serviceEmoji}>{icon}</Text>
+        <Text style={[styles.serviceLabel, { color }]}>{label}</Text>
       </View>
-      <Text style={styles.serviceTitle}>{title}</Text>
-      <Text style={styles.serviceSubtitle}>{subtitle}</Text>
+      {/* Текст */}
+      <View style={styles.serviceTextBlock}>
+        <Text style={styles.serviceTitle}>{title}</Text>
+        <Text style={styles.serviceSubtitle}>{subtitle}</Text>
+      </View>
+      {/* Стрелка */}
+      <View style={[styles.serviceArrow, { backgroundColor: bg }]}>
+        <Text style={[styles.serviceArrowText, { color }]}>›</Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -143,7 +158,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       {/* ── Header ── */}
       <View style={styles.header}>
         <View>
@@ -180,18 +195,21 @@ export default function HomeScreen({ navigation }) {
           onAddToOrder={handleAddToOrder}
         />
 
-        {/* ── Services grid ── */}
+        {/* ── Services ── */}
         <View style={styles.sectionTitleRow}>
           <View style={styles.redStripe} />
           <Text style={styles.sectionTitleText}>Услуги</Text>
         </View>
-        <View style={styles.servicesGrid}>
+        <View style={styles.servicesList}>
           {SERVICE_CARDS.map((s) => (
             <ServiceCard
               key={s.id}
-              emoji={s.emoji}
+              icon={s.icon}
+              label={s.label}
               title={s.title}
               subtitle={s.subtitle}
+              color={s.color}
+              bg={s.bg}
               onPress={() => handleServicePress(s)}
             />
           ))}
@@ -219,6 +237,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 12,
+    minHeight: 64,
   },
   headerSub: {
     color: COLORS.accentLight,
@@ -436,46 +455,75 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  // Services grid
-  servicesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+  // Services list
+  servicesList: {
+    gap: 10,
   },
   serviceCard: {
-    width: '47.5%',
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.surface,
-    borderRadius: 20,
-    padding: 16,
-    borderTopWidth: 3,
-    borderTopColor: COLORS.primaryLight,
+    borderRadius: 18,
+    overflow: 'hidden',
     shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.10,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 3,
+    minHeight: 72,
+  },
+  serviceAccentBar: {
+    width: 4,
+    alignSelf: 'stretch',
+    borderTopLeftRadius: 18,
+    borderBottomLeftRadius: 18,
   },
   serviceIconBox: {
-    width: 46,
-    height: 46,
+    width: 56,
+    height: 56,
     borderRadius: 14,
-    backgroundColor: COLORS.primaryPale,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginLeft: 12,
+    marginRight: 4,
   },
   serviceEmoji: {
-    fontSize: 24,
+    fontSize: 22,
+  },
+  serviceLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 2,
+  },
+  serviceTextBlock: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingLeft: 8,
   },
   serviceTitle: {
     color: COLORS.text,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   serviceSubtitle: {
     color: COLORS.textMuted,
-    fontSize: 11,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  serviceArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  serviceArrowText: {
+    fontSize: 22,
+    fontWeight: '300',
+    lineHeight: 26,
   },
 });
