@@ -13,7 +13,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,10 +24,20 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.goryankaapp"
+      "package": "com.anonymous.goryankaapp",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "beb7e708-ad12-4cf3-aba5-5dc13fb8d952"
+      }
+    },
+    "owner": "halu97",
+    "updates": {
+      "url": "https://u.expo.dev/beb7e708-ad12-4cf3-aba5-5dc13fb8d952"
     }
   }
 }
